@@ -43,6 +43,7 @@ public class HelloController {
 
     String IP_ADDRESS = "localhost";
     int PORT = 8189;
+    String nickName = "";
 
     @FXML
     public void keyListener(KeyEvent keyEvent) {
@@ -88,9 +89,7 @@ public class HelloController {
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
+            new Thread(()-> {
                     try {
                         while (true){
                             try{
@@ -98,9 +97,13 @@ public class HelloController {
                                 if(str.startsWith("/authok")){
                                     setActive(true);
                                     textArea.appendText(str + "\n");
+                                    this.nickName = str.substring(33).trim();
+                                    HistoryManager.saveHistory(nickName, "");
+                                    textArea.appendText(HistoryManager.loadHistory(nickName));
                                     break;
                                 } else {
                                     textArea.appendText(str + "\n");
+                                    HistoryManager.saveHistory(nickName, "");
                                 }
                             } catch (SocketException e){
                                 System.out.println("Server don't callback");
@@ -130,6 +133,7 @@ public class HelloController {
                                     }
                                 } else {
                                     textArea.appendText(str + "\n");
+                                    HistoryManager.saveHistory(nickName, str);
                                 }
 
                             } catch (SocketException e){
@@ -148,7 +152,7 @@ public class HelloController {
                             e.printStackTrace();
                         }
                     }
-                }
+
             }).start();
 
         } catch (Exception e) {
